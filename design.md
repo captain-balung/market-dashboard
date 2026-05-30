@@ -138,10 +138,17 @@ flowchart TB
 | 儀表頁總經儀表 | F-18 |
 | admin 登入 + 管理 | F-19, F-20 |
 
-**⚠️ 待人類拍板的品味決定（暫緩項，開發前須補）：**
+**✅ 視覺拍板（2026-05-30）**：
 
-1. **整體風格參考**——TradingView 風 / CoinGecko 風 / Yahoo Finance 風 的取向，先前討論中此題標記「暫緩」。設計階段前須由人類選定，再交 Claude Design 產原型。
-2. **漲跌配色**（紅綠 vs 紅綠色盲友善配色）與具體色票。
+1. **整體風格參考**：**TradingView 風** — 深底交易終端、密集面板、monospace 數字、緊湊填充。對齊 spec.md「儀表頁像交易終端」+「首頁像緊湊財經儀表報」。
+2. **漲跌配色**：**綠漲紅跌**（歐美財經標準）。
+   - 漲：emerald `#10b981`（Tailwind `emerald-500`），dark mode 用 `emerald-400`
+   - 跌：rose `#ef4444`（Tailwind `rose-500`），dark mode 用 `rose-400`
+   - 持平/未知：zinc-500 / zinc-400
+3. **背景與卡片色階**：
+   - dark：背景 `zinc-950` / 卡面 `zinc-900` / 邊框 `zinc-800`
+   - light：背景 `zinc-50` / 卡面 `white` / 邊框 `zinc-200`
+4. **字型**：sans 用 Geist Sans、數字用 Geist Mono + `tabular-nums`（對齊欄位）。
 
 **交給 Claude Design 的工作**：依上述設計語言與主要畫面，從文字/參考圖產生互動原型、建立設計系統、打包 handoff bundle 交 Claude Code 轉程式碼。**驗收走 Playwright MCP 自動截圖比對**，人類只做最終品味確認。
 

@@ -33,14 +33,16 @@ export async function POST(request: Request) {
   const has_chart = typeof body.has_chart === "boolean" ? body.has_chart : true;
 
   if (!symbol || !VALID_CATEGORIES.has(category)) {
-    return NextResponse.json({ status: "error", message: "invalid symbol or category" }, { status: 400 });
+    return NextResponse.json(
+      { status: "error", message: "invalid symbol or category" },
+      { status: 400 },
+    );
   }
 
   const supabase = getSupabaseServerClient();
-  const { error } = await supabase.from("watchlist").upsert(
-    { symbol, category, tv_symbol, has_chart, active: true },
-    { onConflict: "symbol" },
-  );
+  const { error } = await supabase
+    .from("watchlist")
+    .upsert({ symbol, category, tv_symbol, has_chart, active: true }, { onConflict: "symbol" });
   if (error) return NextResponse.json({ status: "error", message: error.message }, { status: 500 });
   return NextResponse.json({ status: "ok" });
 }
@@ -62,7 +64,10 @@ export async function PATCH(request: Request) {
   const symbol = typeof body.symbol === "string" ? body.symbol.trim().toUpperCase() : "";
   const active = typeof body.active === "boolean" ? body.active : null;
   if (!symbol || active === null) {
-    return NextResponse.json({ status: "error", message: "symbol + active required" }, { status: 400 });
+    return NextResponse.json(
+      { status: "error", message: "symbol + active required" },
+      { status: 400 },
+    );
   }
   const supabase = getSupabaseServerClient();
   const { error } = await supabase.from("watchlist").update({ active }).eq("symbol", symbol);

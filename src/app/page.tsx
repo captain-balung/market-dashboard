@@ -31,9 +31,7 @@ export default async function Home() {
   const cryptoSymbols = (watchlist ?? [])
     .filter((w) => w.category === "crypto" || w.category === "metal")
     .map((w) => w.symbol);
-  const stockSymbols = (watchlist ?? [])
-    .filter((w) => w.category === "stock")
-    .map((w) => w.symbol);
+  const stockSymbols = (watchlist ?? []).filter((w) => w.category === "stock").map((w) => w.symbol);
 
   const warnings: string[] = [];
   const cryptoPrices = await fetchCoingeckoPrices(cryptoSymbols).catch((e: unknown) => {
@@ -74,7 +72,11 @@ export default async function Home() {
       marketClosed = sp?.marketClosed ?? false;
     }
     const snap = snapMap.get(w.symbol) ?? {};
-    const change = calcChangePct(snap.today, snap.yesterday, marketClosed && w.category === "stock");
+    const change = calcChangePct(
+      snap.today,
+      snap.yesterday,
+      marketClosed && w.category === "stock",
+    );
     return { symbol: w.symbol, category: w.category, price, change, marketClosed };
   });
 
@@ -101,6 +103,12 @@ export default async function Home() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Link
+            href="/dashboard"
+            className="rounded border border-[var(--color-border)] px-2 py-1 text-xs text-[var(--color-muted)] hover:bg-[var(--color-surface)]"
+          >
+            盯盤
+          </Link>
           <Link
             href="/weekly"
             className="rounded border border-[var(--color-border)] px-2 py-1 text-xs text-[var(--color-muted)] hover:bg-[var(--color-surface)]"

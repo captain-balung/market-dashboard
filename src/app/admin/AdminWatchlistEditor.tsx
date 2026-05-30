@@ -114,10 +114,14 @@ export function AdminWatchlistEditor({ rows }: { rows: WatchlistRow[] }) {
           {rows.map((r) => (
             <li key={r.symbol} className="flex items-center justify-between gap-2 px-3 py-2">
               <div className="flex items-center gap-3">
-                <span className={`text-sm font-medium ${r.active ? "" : "text-zinc-500 line-through"}`}>
+                <span
+                  className={`text-sm font-medium ${r.active ? "" : "text-zinc-500 line-through"}`}
+                >
                   {r.symbol}
                 </span>
-                <span className="text-[10px] uppercase text-[var(--color-muted)]">{r.category}</span>
+                <span className="text-[10px] uppercase text-[var(--color-muted)]">
+                  {r.category}
+                </span>
                 <span className="text-[10px] text-[var(--color-muted)]">{r.tv_symbol ?? "—"}</span>
               </div>
               <button
