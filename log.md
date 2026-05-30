@@ -245,6 +245,23 @@
 - **後果**：線上 /api/prices 美股 7 標的全部有實際值。**注意**：Finnhub free tier 的 `/stock/market-status` endpoint 對 isOpen 永遠回 false，所以 marketClosed flag 在線上一直是 true；但 `/quote` 回實際 c 與 pc，code 正確顯示 price 與「休市」label（前者真實後者保守）。
 - **風險等級**：低
 
+## CHANGE-017
+
+- **時間戳**：2026-05-30T03:15:00+08:00
+- **類型**：變更（驗收）
+- **範圍與摘要**：Phase 2 Claude API 與 daily cron 一次真實 trigger 完成。結果：snapshot 15 筆全寫入；Finnhub news 902 條 / Marketaux 6 條 / CryptoPanic 0 條（**404 follow-up**）；Claude 摘要 stock=3、geo=2、macro=2、crypto=0、metal=0（後兩者因 CryptoPanic 0 條而 fallback）；payload 含 source_url/source/published_at；retention 跑了 0/0/0。線上首頁渲染 5 類區塊 + 「川普」「伊朗」「軟著陸」實際解讀文字。
+- **觸發來源**：人類指示（cmd b → SQL + trigger）
+- **風險等級**：低
+
+## CHANGE-018 — follow-up
+
+- **時間戳**：2026-05-30T03:15:00+08:00
+- **類型**：修正待辦
+- **範圍與摘要**：CryptoPanic API 端點 404。試過 4 個 URL 變體（v1/posts、free/v1/posts、developer/v2/posts、free/v2/posts、pro/v2/posts）全 404；webfetch dev docs 403、search 出來的兩個來源彼此矛盾（一說 base 改 `/{plan}/v2/`、一說仍是 `/v1/`）；request HTML body 看不出有用線索。
+- **觸發來源**：自動偵測（cron daily 跑出 cryptopanic warning）
+- **決策內容**：暫不修，按 spec.md 工程紅線 4「單一資料源失效不拖垮整頁」，crypto/metal 兩類目前 fallback 為空 digest 區塊；待人類登入 CryptoPanic dashboard 取「實際當前可用 endpoint URL」貼給我，或評估換源（CoinDesk RSS / CoinGecko news beta / NewsAPI 加密類）。
+- **風險等級**：低（不阻塞其他類，且 spec 容錯設計範圍內）
+
 ## CHANGE-014
 
 - **時間戳**：2026-05-30T02:30:00+08:00
