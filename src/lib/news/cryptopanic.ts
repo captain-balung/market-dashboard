@@ -5,7 +5,7 @@
  * 取最近 24 小時的 hot/trending 新聞，標準化成 NewsItem。
  */
 
-import type { NewsItem, NewsCategory } from "./types.ts";
+import type { NewsItem, NewsCategory } from "./types";
 
 export type CryptoPanicPost = {
   title: string;

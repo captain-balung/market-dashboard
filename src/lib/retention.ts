@@ -6,7 +6,7 @@
  * - weekly_digest：> 3 年刪（合 spec：使用者可回看一年週報、保險 3 年）
  */
 
-import { getSupabaseServerClient } from "./supabase-server.ts";
+import { getSupabaseServerClient } from "./supabase-server";
 
 export type RetentionResult = {
   dailyDeleted: number | null;

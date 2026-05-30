@@ -5,7 +5,7 @@
  * 去重（同 url 只留一筆）以免不同來源回相同新聞。
  */
 
-import type { NewsItem } from "./types.ts";
+import type { NewsItem } from "./types";
 
 export type FinnhubNewsItem = {
   headline?: string;

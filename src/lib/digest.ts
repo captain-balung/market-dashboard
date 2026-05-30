@@ -7,9 +7,9 @@
  * 每類產 ~3 則繁中摘要，每則附 source_url 鏈回原文。
  */
 
-import { callClaude } from "./claude.ts";
-import { getSupabaseServerClient } from "./supabase-server.ts";
-import type { NewsItem, NewsCategory } from "./news/types.ts";
+import { callClaude } from "./claude";
+import { getSupabaseServerClient } from "./supabase-server";
+import type { NewsItem, NewsCategory } from "./news/types";
 
 export type DigestItem = {
   title: string; // 繁中標題

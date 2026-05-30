@@ -5,7 +5,7 @@
  * 標準化成 NewsItem 並標 category。
  */
 
-import type { NewsItem, NewsCategory } from "./types.ts";
+import type { NewsItem, NewsCategory } from "./types";
 
 export type MarketauxArticle = {
   title?: string;
