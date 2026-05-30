@@ -78,9 +78,9 @@ export default async function DashboardSymbolPage({ params }: { params: Promise<
         <section className="mb-4 space-y-2">
           <div className="rounded border border-[var(--color-border)] bg-[var(--color-surface)] p-1">
             {tv && current.has_chart ? (
-              <TradingViewWidget symbol={tv} interval="D" studies="main" height={420} />
+              <TradingViewWidget symbol={tv} interval="D" studies="main" height={620} />
             ) : (
-              <div className="h-[420px]">
+              <div className="h-[620px]">
                 <NoChartFallback symbol={symbol} />
               </div>
             )}
