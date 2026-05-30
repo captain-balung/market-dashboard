@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { writeNineAmSnapshot } from "@/lib/snapshot";
-import { fetchCryptoPanicNews } from "@/lib/news/cryptopanic";
+import { fetchCryptoCompareNews } from "@/lib/news/cryptocompare";
 import { fetchFinnhubStockNews } from "@/lib/news/finnhub-news";
 import { fetchMarketauxNews } from "@/lib/news/marketaux";
 import { summarizeOneCategory, persistDailyDigest, getTaipeiDateString } from "@/lib/digest";
@@ -35,9 +35,9 @@ export async function POST(request: Request) {
   }
 
   // F-07/F-08/F-09 平行抓三路
-  const [cryptoPanic, finnhubNews, marketaux] = await Promise.all([
-    fetchCryptoPanicNews().catch((e) => {
-      warnings.cryptopanic = e instanceof Error ? e.message : "unknown";
+  const [cryptoNews, finnhubNews, marketaux] = await Promise.all([
+    fetchCryptoCompareNews().catch((e) => {
+      warnings.cryptocompare = e instanceof Error ? e.message : "unknown";
       return [] as NewsItem[];
     }),
     fetchFinnhubStockNews().catch((e) => {
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
   ]);
 
   steps.newsCounts = {
-    cryptopanic: cryptoPanic.length,
+    cryptocompare: cryptoNews.length,
     finnhub: finnhubNews.length,
     marketaux: marketaux.length,
   };
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
     geo: [],
     macro: [],
   };
-  for (const n of cryptoPanic) byCategory[n.category].push(n);
+  for (const n of cryptoNews) byCategory[n.category].push(n);
   for (const n of finnhubNews) byCategory[n.category].push(n);
   for (const n of marketaux) byCategory[n.category].push(n);
 

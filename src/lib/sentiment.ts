@@ -44,21 +44,23 @@ export async function fetchCryptoFearGreed(): Promise<GaugeValue | null> {
   return parseAlternativeMe((await res.json()) as AlternativeMeResponse);
 }
 
-// -------- F-16: VIX (Finnhub) --------
+// -------- F-16: VIX (FRED VIXCLS — Finnhub free tier 對 ^VIX 拒絕，改 FRED 政府源) --------
 
 export async function fetchVixGauge(): Promise<GaugeValue | null> {
-  const key = process.env.FINNHUB_API_KEY;
-  if (!key) throw new Error("FINNHUB_API_KEY missing");
-  const res = await fetch(`https://finnhub.io/api/v1/quote?symbol=^VIX&token=${key}`, {
-    next: { revalidate: 600 },
-  });
-  if (!res.ok) throw new Error(`Finnhub VIX ${res.status}`);
-  const json = (await res.json()) as { c?: number; t?: number };
-  if (typeof json.c !== "number" || json.c === 0) return null;
+  const key = process.env.FRED_API_KEY;
+  if (!key) throw new Error("FRED_API_KEY missing");
+  const url = `https://api.stlouisfed.org/fred/series/observations?series_id=VIXCLS&api_key=${key}&file_type=json&sort_order=desc&limit=1`;
+  const res = await fetch(url, { next: { revalidate: 600 } });
+  if (!res.ok) throw new Error(`FRED VIXCLS ${res.status}`);
+  const json = (await res.json()) as FredObservationResponse;
+  const last = (json.observations ?? []).filter((o) => o.value && o.value !== ".").slice(-1)[0];
+  if (!last) return null;
+  const value = Number(last.value);
+  if (!Number.isFinite(value)) return null;
   return {
-    value: json.c,
-    label: classifyVix(json.c),
-    asOf: json.t ? new Date(json.t * 1000).toISOString() : undefined,
+    value,
+    label: classifyVix(value),
+    asOf: last.date ?? undefined,
   };
 }
 

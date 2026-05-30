@@ -253,6 +253,43 @@
 - **觸發來源**：人類指示（cmd b → SQL + trigger）
 - **風險等級**：低
 
+## CHANGE-020
+
+- **時間戳**：2026-05-30T03:50:00+08:00
+- **類型**：變更
+- **範圍與摘要**：Phase 4 儀表頁完整 code complete。新增 `src/lib/sentiment.ts` 四源 parser + fetcher (Alternative.me / Finnhub VIX / CNN 非官方 / FRED 5 系列)、`/api/sentiment` 平行抓 + 個別容錯、`/dashboard` 與 `/dashboard/[symbol]` 路由、`DashboardSidebar` + `TradingViewWidget` + `Gauge` + `MacroPanel` + `NoChartFallback` 元件、首頁加「盯盤」nav link。Test 新增 sentiment 6 案、總計 30/30 pass。
+- **觸發來源**：人類拍板視覺風格後（cmd a）
+- **風險等級**：低
+- **caveat**：F-16 用 `^VIX` symbol 可能 Finnhub free tier 不接受、F-17 CNN 非官方端點本就「盡力而為」（spec DECISION-007），實際線上效果待驗。
+
+## CHANGE-022
+
+- **時間戳**：2026-05-30T04:30:00+08:00
+- **類型**：變更
+- **範圍與摘要**：CryptoPanic（CHANGE-018 follow-up）改用 CryptoCompare News（`src/lib/news/cryptocompare.ts`）。daily endpoint 對應改 import。
+- **觸發來源**：人類指示「CryptoPanic 付費、找替代」
+- **後果**：CryptoCompare 線上 endpoint 同樣回「You need a valid auth key」（policy 改了，免費 news endpoint 不再無 key）。code 與 mock 都對、但線上 fallback 為空 → daily 對 crypto/metal 兩類仍空。**待人類**：(a) 註冊 CryptoCompare free key、(b) 換 RSS（CoinDesk/CoinTelegraph）我寫 minimal XML parser、(c) 接受空。
+- **風險等級**：低
+
+## CHANGE-023
+
+- **時間戳**：2026-05-30T04:30:00+08:00
+- **類型**：變更
+- **範圍與摘要**：F-16 VIX 來源從 Finnhub `^VIX`（free tier 拒收）改為 **FRED VIXCLS series**。
+- **觸發來源**：自動偵測（Finnhub free tier 回「Market data subscription required for CFD indices.」）
+- **決策內容**：FRED VIXCLS 是 FRED 政府源、free、與 F-18 共用 key。spec/design 對 VIX 來源未鎖定 Finnhub（design.md 表只說「Finnhub 美股+VIX」，VIX 子項可換）。
+- **風險等級**：低
+- **caveat**：FRED key 目前 31 字元（要 32）、人類反映 fred.stlouisfed.org 註冊有問題，**暫掛**。VIX + 5 項總經一起待 FRED 通。
+
+## CHANGE-021
+
+- **時間戳**：2026-05-30T03:55:00+08:00
+- **類型**：自主判斷
+- **範圍與摘要**：TradingView 嵌入用 **tv.js dynamic script load**，不引入 `tradingview-react-widget` 等套件。
+- **觸發來源**：AI 自主判斷
+- **決策內容**：脈絡：spec.md DECISION-005「TradingView 嵌入 widget」未限定 SDK；社群套件 wrapper 多半過時或不維護；官方 tv.js 直 load 是 TradingView 自家推的 pattern。選項：(A) raw tv.js+useEffect；(B) react wrapper 套件。決定：A，~80 行 client component 控制；`new TradingView.widget(options)` 直接用官方 options 對齊文檔，未來加新 study/timeframe 直改 options。
+- **風險等級**：低
+
 ## DECISION-019
 
 - **時間戳**：2026-05-30T03:30:00+08:00
