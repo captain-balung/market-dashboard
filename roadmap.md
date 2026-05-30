@@ -8,16 +8,16 @@
 
 ## 1.6 當前焦點
 
-**路徑**：Phase 0 → 專案初始化 → 尚未開始
-**狀態**：⬜ 等待人類提供各 API key 與 Supabase/Vercel 專案後啟動
-**信心**：—
-**預計**：待 kickoff
+**路徑**：Phase 1 → 資料層與價格 → 1.A.1 watchlist 16 筆種子
+**狀態**：🔄 進行中
+**信心**：高（pipeline 已通、加 15 筆種子 + 擴 CoinGecko/Finnhub adapter 為主）
+**預計**：本 session 內收 Phase 1
 
 ---
 
 ## 1.9 進度摘要
 
-整體 0%｜當前 Phase 0%｜尚未開始｜本 session 新完成 0 個葉節點
+整體 13%（1/6 Phase 完成）｜Phase 0 100% ✅｜Phase 1 啟動中｜本 session 新完成 8 個葉節點（全 Phase 0）
 
 ---
 
@@ -27,7 +27,6 @@
 |---|---|---|
 | 整體風格參考（TradingView/CoinGecko/Yahoo 風） | 待人類決策 | spec/design 已標「暫緩」，**進入 Phase 4 視覺前須拍板**（design.md 視覺與介面） |
 | 漲跌配色與色票 | 待人類決策 | 同上，設計階段前定 |
-| 各 API key、Supabase 專案、Vercel 專案 | 外部依賴 | 需人類提供才能啟動 Phase 0 |
 | CNN 非官方端點當前 URL/格式 | 外部依賴 | F-17 實作時需確認當前可用端點 |
 
 ---
@@ -51,24 +50,24 @@
 
 > 葉節點皆附可機器驗證條件，引用 spec.md 功能 ID。預設只展開當前 Phase（1.11）。
 
-### ⬜ Phase 0：管線優先
+### ✅ Phase 0：管線優先
 
-- ⬜ **0.1 專案初始化**
-  - ⬜ 0.1.1 `create-next-app`（TS）初始化　`驗證：npm run dev 起得來、首頁 200`
-  - ⬜ 0.1.2 ESLint/Prettier 設定　`驗證：npm run lint 通過`
-  - ⬜ 0.1.3 接上 git repo、首次 commit　`驗證：git log 有初始 commit`
-- ⬜ **0.2 部署優先**
-  - ⬜ 0.2.1 Vercel 連 repo、設環境變數空殼　`驗證：push 後 Vercel 線上 URL 回 200`（需人類確認首次部署）
-  - ⬜ 0.2.2 Supabase 專案連線、JS client 設定　`驗證：server 端能 select 一筆測試資料`
-- ⬜ **0.3 全鏈路測通 + MVP**
-  - ⬜ 0.3.1 建一張 `watchlist` 表 + 1 筆種子　`驗證：supabase 表查得到該筆`
-  - ⬜ 0.3.2 `/api/prices` 抓該標的現價（CoinGecko）　`驗證：線上 curl 回傳含 price`
-  - ⬜ 0.3.3 首頁顯示該標的現價（端到端）　`驗證：線上首頁可見一張價格卡`
+- ✅ **0.1 專案初始化**
+  - ✅ 0.1.1 `create-next-app`（TS）初始化　`驗證：npm run dev 起得來、首頁 200` — Next.js 15 LTS（從 16 降版，見 log CHANGE-001）
+  - ✅ 0.1.2 ESLint/Prettier 設定　`驗證：npm run lint 通過` — FlatCompat 風（Next 15 兼容）
+  - ✅ 0.1.3 接上 git repo、首次 commit　`驗證：git log 有初始 commit` — captain-balung/market-dashboard
+- ✅ **0.2 部署優先**
+  - ✅ 0.2.1 Vercel 連 repo、設環境變數空殼　`驗證：push 後 Vercel 線上 URL 回 200` — 線上 market-dashboard-five-liard.vercel.app（踩 3 個雷見 log CHANGE-002/003/004）
+  - ✅ 0.2.2 Supabase 專案連線、JS client 設定　`驗證：server 端能 select 一筆測試資料` — /api/health 200 OK
+- ✅ **0.3 全鏈路測通 + MVP**
+  - ✅ 0.3.1 建一張 `watchlist` 表 + 1 筆種子　`驗證：supabase 表查得到該筆` — BTC/crypto/BINANCE:BTCUSDT
+  - ✅ 0.3.2 `/api/prices` 抓該標的現價（CoinGecko）　`驗證：線上 curl 回傳含 price` — BTC $73,854
+  - ✅ 0.3.3 首頁顯示該標的現價（端到端）　`驗證：線上首頁可見一張價格卡` — BTC 卡片渲染
 
-### ⬜ Phase 1：資料層與價格
+### 🔄 Phase 1：資料層與價格
 
-- ⬜ **1.A watchlist（F-01）**
-  - ⬜ 1.A.1 `watchlist` schema（symbol/category/tv_symbol/has_chart/active）+ 16 筆種子　`驗證：GET /api/watchlist 筆數=16`
+- 🔄 **1.A watchlist（F-01）**
+  - 🔄 1.A.1 `watchlist` schema（symbol/category/tv_symbol/has_chart/active）+ 16 筆種子　`驗證：GET /api/watchlist 筆數=16`
 - ⬜ **1.B 價格抓取（F-02, F-03）**
   - ⬜ 1.B.1 CoinGecko 抓 6 幣+PAXG+KAG　`驗證：mock 測試解析 8 標的 price`
   - ⬜ 1.B.2 Finnhub 抓 7 美股 + 休市旗標　`驗證：mock 測試含 marketStatus`
@@ -124,4 +123,4 @@
 
 ## 1.11 樹狀展開狀態
 
-預設只展開**當前 Phase（Phase 0）**與當前焦點路徑；其餘 Phase 收合，待進入時展開，避免一次被所有細項淹沒。
+預設只展開**當前 Phase（Phase 1）**與當前焦點路徑；其餘 Phase 收合，待進入時展開，避免一次被所有細項淹沒。

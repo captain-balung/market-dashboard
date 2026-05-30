@@ -85,3 +85,63 @@
 - 風險等級：低/中/高/不可逆
 
 -->
+
+## CHANGE-001
+
+- **時間戳**：2026-05-30T00:30:00+08:00
+- **類型**：變更（降版）
+- **範圍與摘要**：Next.js 16.2.6 → 15.5.18（LTS）。eslint-config-next 同步降版。eslint.config.mjs 改 FlatCompat 風（Next 15 兼容）。
+- **觸發來源**：自動偵測（Phase 0.2.1 部署 build 成功但 routing 全 404）
+- **決策內容**：
+  - 症狀：`vercel --prod` build log 顯示 `▲ Next.js 16.2.6 (Turbopack)` 全綠通過、`Build Completed in /vercel/output [24s]`，但 production / preview 全部 routing 404；`.next/server/app/index.html` 有 emit、卻沒進 `.vercel/output/static/`。
+  - 試過：把 `next build --webpack` 強制關 Turbopack、加 `NEXT_DISABLE_TURBOPACK=1`、`vercel build --prebuilt` — 均無效。
+  - 真正關鍵在 Vercel 內部 `@vercel/next` adapter 對 Next.js 16 prerender manifest 格式不兼容（但偽裝 build 成功）。
+  - 解：降版到 15 LTS（react@19 保留）。
+- **風險等級**：中（功能無影響，但與 spec design.md 未指定版本相符；之後 Next.js 16 在 Vercel adapter 穩定後可再評估升版）
+
+## CHANGE-002
+
+- **時間戳**：2026-05-30T00:30:00+08:00
+- **類型**：決策
+- **範圍與摘要**：repo 加 `vercel.json` 強制 `"framework": "nextjs"`，override Vercel Project Settings。
+- **觸發來源**：自動偵測（同 CHANGE-001 的 404 調查）
+- **決策內容**：
+  - 脈絡：用 `vercel projects add market-dashboard` 建專案時 Vercel **不自動偵測 framework**，預設為 `Other`。每次 deploy 走 `@vercel/static-build` 而非 `@vercel/next`，build 後 `.vercel/output/static/` 只含 `public/*.svg`，配上 catch-all 404 routing rule，所有路徑回 404。
+  - 選項：(A) dashboard 手動改 Project Settings Framework Preset → Next.js；(B) repo 加 `vercel.json` 設 framework；(C) 用 `vercel link --yes` 觸發框架自動偵測（但 cwd 含中文時 `vercel link` 報錯）。
+  - 選 B：寫進 repo 跟 git 走、新環境/重建專案也不會踩坑。也順手強制：未來換 Vercel project／clone 到新環境，framework 不會漂移。
+  - `vercel.json` 內容：`{ "$schema": "https://openapi.vercel.sh/vercel.json", "framework": "nextjs" }`
+- **風險等級**：低
+
+## CHANGE-003
+
+- **時間戳**：2026-05-30T00:30:00+08:00
+- **類型**：修正（外部設定）
+- **範圍與摘要**：Vercel project Deployment Protection 預設開「Standard Protection (Require Log In)」，包含 production deployment 也擋；需 dashboard 關閉 toggle 才能讓訪客唯讀（對齊 spec.md 總體規範 5）。
+- **觸發來源**：自動偵測（curl production URL 全 401，response header 含 `_vercel_sso_nonce`）
+- **決策內容**：
+  - Vercel Hobby 對新 project 預設 Vercel Authentication 為 Standard Protection（Pro 才能改成 All Deployments）。
+  - 但 toggle「Require Log In」**Hobby 免費可關**。下拉鎖死不是真正阻礙。
+  - 解：dashboard → Settings → Deployment Protection → 把 Require Log In toggle 關掉 → Save。
+  - 既有 4 個 project（captain-balung-devlog、ai-daily-brief、statistics、statistics-wkjw）皆已預先關過，所以對照 200。
+- **風險等級**：中（這個 setting 沒關 → 整個專案精神「對訪客唯讀公開」失效）
+
+## CHANGE-004
+
+- **時間戳**：2026-05-30T00:30:00+08:00
+- **類型**：修正
+- **範圍與摘要**：禁用 PowerShell 5.1 pipe 到 native exe（特別是 `vercel env add`）— pipe stdin 會在 value 起頭加 UTF-8 BOM (`﻿` / 65279)，造成 Supabase HTTP client 報 `Cannot convert argument to a ByteString because the character at index 0 has a value of 65279`。改用 bash `printf '%s' | vercel env add KEY production`。
+- **觸發來源**：自動偵測（線上 /api/prices 500，error message 直指 65279）
+- **決策內容**：
+  - 試過：在 PowerShell 設 `[Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)` + `$OutputEncoding` 同設 — **無效**，BOM 仍出現。
+  - PowerShell 5.1 native exe stdin 編碼有多層默認，難以靠單一 flag 鎖。
+  - 解：用 bash `printf '%s' "$val" | vercel env add ...`（保證無 BOM、無 trailing newline）。
+  - 行動：把 12 個 env vars 全部 rm + 重 add，這次走 bash 路徑。
+- **風險等級**：中（之後若不知這坑，其他 secret 上傳會繼續壞）
+
+## CHANGE-005
+
+- **時間戳**：2026-05-30T00:30:00+08:00
+- **類型**：變更
+- **範圍與摘要**：build script 短暫加過 `--webpack` flag、Vercel 加過 `NEXT_DISABLE_TURBOPACK=1` env var。CHANGE-001 降版後 `--webpack` flag 移除（Next.js 15 無此 flag）；env var 因 .env.local 不再列也未重 upload。
+- **觸發來源**：自動偵測（試錯路徑）
+- **風險等級**：低（Vercel 端 `NEXT_DISABLE_TURBOPACK=1` 殘留，無實際作用；下次 env 整理時可手動 rm）

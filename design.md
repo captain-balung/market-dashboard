@@ -172,6 +172,8 @@ flowchart TB
 2. push 到 main → Vercel 自動 build & deploy
 3. Vercel Cron 設定：`/api/cron/daily` 每日台北 09:00（UTC 01:00）、`/api/cron/weekly` 週一台北 09:00
 
+**框架強制**：repo 含 `vercel.json` 設 `"framework": "nextjs"`，避免新環境/重建 project 時 Vercel 偵測成 "Other" 走錯 builder（見 log CHANGE-002）。
+
 **自動化程度**：build/deploy 全自動；**人類確認點**＝首次 production 部署、環境變數變更、schema migration（皆屬 ai-rules.md「需確認」項）。
 
 **時區注意**：Vercel Cron 以 UTC 設定。台北 09:00 = UTC 01:00。排程設定須寫 UTC 並在程式內以 `Asia/Taipei` 計算「前一日」與「9:00 快照」邏輯，避免日界線錯誤。

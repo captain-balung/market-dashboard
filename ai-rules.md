@@ -102,9 +102,10 @@ AI 必須主動回報，不是人類問才答：
 > 由 `log.md` 踩過的雷晉升而來的一行式硬規則。格式：`- 不要在 X 情境用 Y（踩過，見 log YYYY-MM-DD）`。
 > 控制數量 ≤ 12 條，超過時刪最舊/不復發者（原始紀錄仍留在 log.md）。
 
-（目前為空，開發中累積。範例格式：）
-
-- _尚無_
+- 不要在 Windows PowerShell 5.1 用 `| vercel env add` 餵 secret value（會塞 UTF-8 BOM，Supabase 端拋 ByteString error）；改用 bash `printf '%s' "$val" | vercel env add KEY production`，或 Vercel dashboard 手動貼。**踩過，見 log 2026-05-30 CHANGE-004**。
+- 不要用 `vercel projects add NAME` 建專案再 link（framework 預設 Other，整站 routing 404）；改用 `vercel link --yes` 觸發自動偵測，或必裝 `vercel.json` 寫 `"framework": "nextjs"`。**踩過，見 log 2026-05-30 CHANGE-002**。
+- 不要對 Vercel 線上部署用 Next.js 16（`@vercel/next` adapter 對 16 prerender manifest 不兼容、build 假成功但 routing 404）；用 Next.js 15 LTS。**踩過，見 log 2026-05-30 CHANGE-001**。
+- 不要忘記新 Vercel project 預設開「Standard Protection / Require Log In」連 production 都 401；dashboard → Deployment Protection → 關 toggle。**踩過，見 log 2026-05-30 CHANGE-003**。
 
 ---
 
