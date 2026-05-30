@@ -68,6 +68,9 @@ export function TradingViewWidget({
         ref.current.innerHTML = "";
         const target = document.createElement("div");
         target.id = id;
+        // autosize 模式下 inner container 必須有 explicit 100% 寬高，否則 TV widget 算到 0 → 主 chart 區崩塌、只剩工具列
+        target.style.width = "100%";
+        target.style.height = "100%";
         ref.current.appendChild(target);
         new window.TradingView.widget({
           container_id: id,
@@ -98,7 +101,7 @@ export function TradingViewWidget({
     };
   }, [id, symbol, interval, studies]);
 
-  return <div ref={ref} style={{ height }} className="w-full" />;
+  return <div ref={ref} style={{ height, width: "100%" }} />;
 }
 
 export function NoChartFallback({ symbol }: { symbol: string }) {
