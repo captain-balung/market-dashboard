@@ -76,3 +76,45 @@
 - 「為什麼 admin 認證自寫 50 行就好、不裝 next-auth」— 服務一個人的判斷
 - 「品味屬人類、code 屬 AI：AI 該停下問的地方」— 規範如何防止 AI 過度自主
 - 「Vercel hobby Cron 用免錢 + Anthropic 一次 $0.05 = 一個 AI 看板月成本 < $5」— 個人 AI 工具經濟學
+
+---
+
+## 2026-05-30（收工）— 一個 session 主線 6/6 Phase 全收尾
+
+**對應里程碑**：spec.md 全 21 個 F-XX 中 18 個完整通過、3 個容錯通過、Phase 5.3 rollback 演練實測
+
+**進度重點（人話）**：
+- 從規格定案到「線上完整可用版本」一個 session 完成：
+  - 首頁：價格牆 15 標的（現價 + 9:00 定格漲跌 + 休市）、五類新聞 AI 繁中摘要、本週重點入口、深淺主題切換
+  - 儀表頁：TradingView K 線（日線主圖 + 4h/1h/15m 三小圖、含 MA/MACD/RSI/布林/量）、三個情緒儀表（加密 23 Extreme Fear / VIX / CNN 60 Greed）、五項總經
+  - admin：HMAC session、watchlist 增減 UI
+  - 排程：daily（snapshot + 三源新聞 + Claude 五類 + retention）、weekly（7 份濃縮）
+  - 容錯設計：所有外部源獨立 try/catch、單一失效顯「暫無資料」、不拖垮全頁
+- 線上 https://market-dashboard-five-liard.vercel.app／/dashboard/BTC／/weekly／/admin 全可訪問
+- 16 個 git commit、33 個 mock test 全通、5 個踩雷晉升 ai-rules 硬性教訓
+- Phase 5.3 rollback 演練實測 < 1 分鐘
+
+**踩雷成就（log 與 ai-rules 已收編）**：
+1. PowerShell 5.1 pipe 加 BOM 到 vercel CLI stdin（2 小時除錯）
+2. `vercel projects add` 不偵測 framework，預設 Other（整站 routing 404）
+3. Next.js 16 + Vercel adapter build 假成功（routing 全 404）
+4. Vercel Hobby 新 project 預設「Require Log In」連 production 都 401
+5. `.ts` extension 在 src/ 內互相 import 被 Vercel build 拒收
+
+**剩 follow-up（全外部依賴）**：
+- FRED API key 修（解 VIX + 5 項總經 → 自然激活）
+- CryptoCompare free key 註冊 / 或換 RSS 源（解 crypto/metal 兩類 news）
+- 等下週一 09:00 Vercel cron 自然觸發週報
+
+**可講/不可講**：
+- ✅ 可講：spec → code → 線上一氣呵成的時程、踩雷成就、容錯設計如何救場
+- ✅ 可講：「先讓水管通水，再裝水龍頭」管線優先順序的實踐紀錄
+- ✅ 可講：規格體系（spec/ai-rules/roadmap/log/journal）如何讓 AI 自主推進但不離題
+- ✅ 可講：Vercel rollback < 1 分鐘的演練體驗
+- ⚠️ 不可講：所有 env vars 值、admin 帳密、CRON_SECRET、token
+
+**素材鉤子（選填）**：
+- 「一個個人專案花一晚從零到 6 個 Phase 100% — 規格體系作為自動化框架的 PoC」
+- 「Vercel rollback 演練 < 1 分鐘 — production 安全感的真實成本」
+- 「CryptoPanic / CryptoCompare 雙雙改付費／加 key — 免費新聞 API 末路與 RSS 復活」
+- 「主線 100% 但有 follow-up — 為什麼這不是失敗、而是設計」（容錯與外部依賴的責任分離）

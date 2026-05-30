@@ -271,6 +271,20 @@
 - **後果**：CryptoCompare 線上 endpoint 同樣回「You need a valid auth key」（policy 改了，免費 news endpoint 不再無 key）。code 與 mock 都對、但線上 fallback 為空 → daily 對 crypto/metal 兩類仍空。**待人類**：(a) 註冊 CryptoCompare free key、(b) 換 RSS（CoinDesk/CoinTelegraph）我寫 minimal XML parser、(c) 接受空。
 - **風險等級**：低
 
+## CHANGE-024
+
+- **時間戳**：2026-05-30T04:45:00+08:00
+- **類型**：變更（驗收）
+- **範圍與摘要**：Phase 5.3 Vercel rollback 預案實測一次成功。
+- **觸發來源**：人類指示（cmd d → rollback 演練）
+- **決策內容**：
+  - Step 1: `vercel rollback https://market-dashboard-l5pdqhfc0-...vercel.app --yes` → "Rolled back" 242ms
+  - Step 2: curl `/` → HTTP 200（驗 alias 已指向 4h 前那份）
+  - Step 3: `vercel promote https://market-dashboard-47p8bh3qv-...vercel.app --yes` → "Promoted" 15ms
+  - Step 4: curl `/` + `/dashboard/BTC` → HTTP 200 + 200（回到最新）
+  - 整個演練 < 1 分鐘；訪客在 Step 1-3 間不到一分鐘可能看到 4h 前的舊功能版（無功能缺、有 PriceWall+DigestSection+Dashboard），無感切回。
+- **風險等級**：低（Vercel rollback 是 build artifact 切 alias，無 schema/env 風險）
+
 ## CHANGE-023
 
 - **時間戳**：2026-05-30T04:30:00+08:00

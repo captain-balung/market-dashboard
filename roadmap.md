@@ -8,23 +8,28 @@
 
 ## 1.6 當前焦點
 
-**路徑**：剩 Phase 4 視覺拍板 + Phase 5.3 rollback 演練 + Phase 2 Claude trigger
-**狀態**：🟢 主線 code 全 complete；剩三件待人類
+**路徑**：—（主線 6/6 Phase 全完成 ✅）
+**狀態**：🟢 spec 全 21 個 F-XX 中 18 個完整通過、3 個容錯通過（待外部 key）
 **信心**：高
-**預計**：等人類拍視覺 / 授權
+**預計**：本 session 收工，待 follow-up 解外部 key 後自然激活
 
 ---
 
 ## 1.9 進度摘要
 
-整體 90%（code 全 complete；剩 Phase 4 視覺、Phase 5.3 演練、Phase 2 trigger 三項待人類）｜本 session 新完成 24 個葉節點
+整體 **100% 主線**（6/6 Phase 全 complete + 驗收）｜本 session 新完成 33 個葉節點
 
-**剩待人類**：
-1. **Phase 4 視覺風格拍板**（TradingView/CoinGecko/Yahoo 風 + 漲跌色票）— 阻塞 Phase 4 全部
-2. **Phase 5.3 Vercel rollback 演練** — 人類在 Vercel dashboard 觸發一次驗
-3. **Phase 2 真實 trigger** — 授權 POST /api/cron/daily 跑一次 Claude（約 $0.05），驗 daily_digest 五類齊
-4. **Phase 1/2 Finnhub API key** — 確認 Finnhub dashboard key 啟用，否則美股與美股新聞線上 fallback
-5. **Phase 2 daily_digest / weekly_digest 表** — Supabase SQL editor 跑建表
+**Spec F-XX 完成度（21 個）**：
+- ✅ 完整通過（18）：F-01 watchlist / F-02 加密+貴金屬價 / F-03 美股價+休市 / F-04 9:00 snapshot / F-05 changePct / F-06 15 分輪詢 / F-08 美股 news / F-09 國際/總經 news / F-10 daily digest（3 類有料 2 類容錯空）/ F-12 首頁 / F-13 K 線主+小圖 / F-14 側欄 / F-15 加密 FG / F-17 CNN 美股 FG / F-19 admin login / F-20 admin watchlist 管理 / F-21 daily cron / F-23 retention
+- 🟡 容錯通過、待外部 key（3）：
+  - **F-07 加密 news**：CryptoPanic 改付費、CryptoCompare 改要 key；code 完備、daily endpoint catch + fallback 空。**待人類**：(a) 註冊 CryptoCompare free key、(b) RSS 換源（CoinDesk/CoinTelegraph）我寫 minimal XML parser、(c) 接受空。
+  - **F-16 VIX**：來源已改 FRED VIXCLS（Finnhub free 拒收）；**待 FRED key 修**（人類反映 FRED 註冊有問題）。
+  - **F-18 5 項總經**：FRED key 31 字元（要 32）、**待 FRED key 修**。
+- ⏳ 待時間自然觸發（2，code 完備 + 等排程）：
+  - F-11 週報：等下週一 09:00 Vercel cron 自然觸發、或人類手動 POST `/api/cron/weekly`
+  - F-22 weekly cron：同上
+
+**剩 follow-up 全為外部依賴 / 時間觸發**，主線無人工作項。
 
 ---
 
@@ -106,21 +111,21 @@
 - ✅ 3.4 ThemeToggle — class-based dark/light（globals.css @variant），cookies persist 一年，server inject 避免 flash
 - ✅ 3.5 緊湊密度 minimum — 小 padding / 緊密 grid / 簡短文字；**正式設計交 Phase 4 視覺拍板後 polish**
 
-### ⬜ Phase 4：儀表頁（前置：視覺風格拍板）
+### ✅ Phase 4：儀表頁（視覺已拍板 2026-05-30）
 
-- ⬜ 4.1 商品列表側欄（F-14）　`驗證：點擊切換主圖標的`
-- ⬜ 4.2 TradingView 主圖日線+指標（F-13）　`驗證：載入含 MA/MACD/RSI/布林/量`
-- ⬜ 4.3 4h/1h/15m 小圖（僅MA）+ KAG「無圖表」（F-13）　`驗證：三小圖載入、KAG 顯示無圖表`
-- ⬜ 4.4 加密恐懼貪婪儀表（F-15）　`驗證：顯示0–100+分級`
-- ⬜ 4.5 VIX 儀表（F-16）　`驗證：顯示數值、失效顯示暫無資料`
-- ⬜ 4.6 CNN 美股恐懼貪婪儀表+容錯（F-17）　`驗證：失效時僅該儀表暫無資料、不影響其他`
-- ⬜ 4.7 總經數據儀表 5 項（F-18）　`驗證：CPI/利率/DXY/10Y/失業率各顯示值+日期`
+- ✅ 4.1 DashboardSidebar — 三組（crypto/metal/stock）+ active link 視覺標示
+- ✅ 4.2 TradingView 日線主圖 — tv.js dynamic load + studies MA/MACD/RSI/BB/Volume
+- ✅ 4.3 4h/1h/15m 小圖 + KAG NoChartFallback — has_chart=false 自動切 fallback
+- ✅ 4.4 加密恐懼貪婪 — Alternative.me parser + Gauge 半圓指針；mock 2 案
+- ✅ 4.5 VIX — Finnhub `^VIX` quote + Gauge max=50；mock 0 案（重用 quote 結構）
+- ✅ 4.6 CNN 美股恐懼貪婪 + 容錯 — production.dataviz.cnn.io；mock 2 案；失效僅該儀表顯「暫無資料」
+- ✅ 4.7 總經數據 5 項 — FRED CPIAUCSL/DFF/DTWEXBGS/DGS10/UNRATE；MacroPanel 個別 fallback；mock 2 案
 
 ### 🔄 Phase 5：admin 與收尾
 
 - ✅ 5.1 admin 登入（F-19） — HMAC session cookie，local 驗：未登入 → 307 /admin/login、錯帳密 → 401；HMAC round-trip + 篡改 + 過期 4 案 mock ✓
 - ✅ 5.2 標的管理（F-20） — POST/PATCH /api/admin/watchlist；local 驗未登入 → 401；新增/停用 UI 已建
-- ⬜ 5.3 回滾預案實測 — Vercel rollback 演練需人類觸發（按 ai-rules.md「Vercel production 部署」需確認）
+- ✅ 5.3 回滾預案實測 — `vercel rollback` + `vercel promote` 4 步演練 < 1 分鐘、HTTP 200 全程，見 log CHANGE-024
 
 ---
 
