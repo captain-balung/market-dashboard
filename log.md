@@ -271,6 +271,20 @@
 - **後果**：CryptoCompare 線上 endpoint 同樣回「You need a valid auth key」（policy 改了，免費 news endpoint 不再無 key）。code 與 mock 都對、但線上 fallback 為空 → daily 對 crypto/metal 兩類仍空。**待人類**：(a) 註冊 CryptoCompare free key、(b) 換 RSS（CoinDesk/CoinTelegraph）我寫 minimal XML parser、(c) 接受空。
 - **風險等級**：低
 
+## CHANGE-025
+
+- **時間戳**：2026-05-30T14:30:00+08:00
+- **類型**：修正
+- **範圍與摘要**：Phase 4 主 K 線（dashboard/[symbol]）視覺崩塌，Playwright 截圖驗。兩個 bug 同一現象：
+  1. TradingViewWidget autosize 模式下 inner target div 沒 explicit width/height（建 div 時只 set id 不 set size），TV 內部算到 0 → chart canvas 整片黑空白只剩工具列 overlay。
+  2. 主圖 height=420 不夠塞 5 個 indicator（MA + MACD + RSI + 布林 + 量）+ toolbar + time-axis，price K 線 canvas 被擠到剩 ~40px。
+- **觸發來源**：人類視覺回報「大的 K 線有一點跑掉」 + Playwright MCP 截圖驗
+- **修法**：
+  1. TradingViewWidget.tsx 建 target div 後 `target.style.width = "100%"; target.style.height = "100%"`；外層 ref div 同步 explicit width=100%。
+  2. dashboard/[symbol]/page.tsx 主圖 height 420 → 620。
+- **風險等級**：低
+- **晉升 ai-rules**：「TradingView widget autosize 模式下 inner target div 必須 explicit 100% 寬高」可考慮加入硬性教訓清單（已 fix 條目，留 log 不晉升）。
+
 ## CHANGE-024
 
 - **時間戳**：2026-05-30T04:45:00+08:00
