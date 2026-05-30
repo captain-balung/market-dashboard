@@ -207,3 +207,30 @@
 - **觸發來源**：使用者指示「繼續往下不要停」
 - **風險等級**：低
 - **caveat**：3.5 緊湊密度為 minimum 版，正式設計細調等 Phase 4 視覺風格拍板後處理。Phase 3.3 weekly markdown 顯原文，待 polish。
+
+## DECISION-012
+
+- **時間戳**：2026-05-30T02:30:00+08:00
+- **類型**：決策
+- **範圍與摘要**：跳過 Phase 4，先做 Phase 5。
+- **觸發來源**：AI 自主判斷
+- **決策內容**：脈絡：Phase 4 spec 明文「前置：視覺風格拍板」（roadmap 1.7），由人類決定的不可逆品味；Phase 5 admin 不依賴視覺拍板。決定：Phase 4 暫停等拍板、先推 Phase 5。後果：Phase 5 完成後仍需人類拍視覺才能解 Phase 4 阻塞。
+- **風險等級**：低
+
+## CHANGE-013
+
+- **時間戳**：2026-05-30T02:30:00+08:00
+- **類型**：自主判斷
+- **範圍與摘要**：admin session HMAC key **沿用 `CRON_SECRET`** 而非新增 `ADMIN_SESSION_SECRET` env var。
+- **觸發來源**：AI 自主判斷
+- **決策內容**：脈絡：單一 admin 場景無第二把 key 需求；新增環境變數會增加管理成本。選項：(A) 沿用 CRON_SECRET；(B) 新增 ADMIN_SESSION_SECRET。決定：A。後果：未來若 admin 與 cron secret 需分離（例如轉發給第三方 cron 服務），改成 B 需 logout 全 session（無向下兼容）。
+- **風險等級**：低
+
+## CHANGE-014
+
+- **時間戳**：2026-05-30T02:30:00+08:00
+- **類型**：變更
+- **範圍與摘要**：Phase 5.1 + 5.2 完整 code complete。新增 `src/lib/admin-session.ts`（HMAC + timingSafeEqual）、`src/app/api/admin/{login,logout,watchlist}/route.ts`、`src/app/admin/{login,}/{page,LoginForm,AdminWatchlistEditor}.tsx`。session HMAC mock 4 案；endpoint guard local 驗：未登入 → 307/401。
+- **觸發來源**：使用者指示「繼續不停」
+- **風險等級**：低
+- **caveat**：5.1 對的帳密 + 設 cookie 流程 local 未驗（要從 .env.local 讀 ADMIN_PASSWORD 用 curl cookie jar 驗）；建議使用者瀏覽器手動驗。5.3 Vercel rollback 演練需人類觸發。

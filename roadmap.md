@@ -8,19 +8,23 @@
 
 ## 1.6 當前焦點
 
-**路徑**：Phase 4 待視覺拍板 / Phase 5 admin
-**狀態**：🔄 評估順序中（Phase 4 阻塞於設計拍板）
-**信心**：高（Phase 0-3 全 code complete + local 端到端 OK）
-**預計**：Phase 5 可立即推進
+**路徑**：剩 Phase 4 視覺拍板 + Phase 5.3 rollback 演練 + Phase 2 Claude trigger
+**狀態**：🟢 主線 code 全 complete；剩三件待人類
+**信心**：高
+**預計**：等人類拍視覺 / 授權
 
 ---
 
 ## 1.9 進度摘要
 
-整體 67%（4/6 Phase 完成 — 加 Phase 3 code complete）｜Phase 0/1/2/3 ✅｜本 session 新完成 22 個葉節點
+整體 90%（code 全 complete；剩 Phase 4 視覺、Phase 5.3 演練、Phase 2 trigger 三項待人類）｜本 session 新完成 24 個葉節點
 
-**Phase 2 caveat**：2.B.1 / 2.B.2 / 2.C.1 / 2.C.2 / 2.C.3 / 2.C.4 已 code complete + mock pass + secret 守門驗，**實跑 Claude API 與首次 cron 驗證待人類授權**。
-**Phase 3 caveat**：3.5 緊湊密度 minimum 版，正式設計待 Phase 4 視覺拍板後 polish；weekly markdown render 用 pre-wrap，後續換正式 renderer。
+**剩待人類**：
+1. **Phase 4 視覺風格拍板**（TradingView/CoinGecko/Yahoo 風 + 漲跌色票）— 阻塞 Phase 4 全部
+2. **Phase 5.3 Vercel rollback 演練** — 人類在 Vercel dashboard 觸發一次驗
+3. **Phase 2 真實 trigger** — 授權 POST /api/cron/daily 跑一次 Claude（約 $0.05），驗 daily_digest 五類齊
+4. **Phase 1/2 Finnhub API key** — 確認 Finnhub dashboard key 啟用，否則美股與美股新聞線上 fallback
+5. **Phase 2 daily_digest / weekly_digest 表** — Supabase SQL editor 跑建表
 
 ---
 
@@ -112,11 +116,11 @@
 - ⬜ 4.6 CNN 美股恐懼貪婪儀表+容錯（F-17）　`驗證：失效時僅該儀表暫無資料、不影響其他`
 - ⬜ 4.7 總經數據儀表 5 項（F-18）　`驗證：CPI/利率/DXY/10Y/失業率各顯示值+日期`
 
-### ⬜ Phase 5：admin 與收尾
+### 🔄 Phase 5：admin 與收尾
 
-- ⬜ 5.1 admin 登入（F-19）　`驗證：未登入導向登入頁、對的帳密設 session`
-- ⬜ 5.2 標的管理（F-20）　`驗證：新增後 /api/watchlist 反映、未登入寫入回401`
-- ⬜ 5.3 回滾預案實測　`驗證：Vercel rollback 演練一次成功`
+- ✅ 5.1 admin 登入（F-19） — HMAC session cookie，local 驗：未登入 → 307 /admin/login、錯帳密 → 401；HMAC round-trip + 篡改 + 過期 4 案 mock ✓
+- ✅ 5.2 標的管理（F-20） — POST/PATCH /api/admin/watchlist；local 驗未登入 → 401；新增/停用 UI 已建
+- ⬜ 5.3 回滾預案實測 — Vercel rollback 演練需人類觸發（按 ai-rules.md「Vercel production 部署」需確認）
 
 ---
 
