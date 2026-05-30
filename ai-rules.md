@@ -106,6 +106,7 @@ AI 必須主動回報，不是人類問才答：
 - 不要用 `vercel projects add NAME` 建專案再 link（framework 預設 Other，整站 routing 404）；改用 `vercel link --yes` 觸發自動偵測，或必裝 `vercel.json` 寫 `"framework": "nextjs"`。**踩過，見 log 2026-05-30 CHANGE-002**。
 - 不要對 Vercel 線上部署用 Next.js 16（`@vercel/next` adapter 對 16 prerender manifest 不兼容、build 假成功但 routing 404）；用 Next.js 15 LTS。**踩過，見 log 2026-05-30 CHANGE-001**。
 - 不要忘記新 Vercel project 預設開「Standard Protection / Require Log In」連 production 都 401；dashboard → Deployment Protection → 關 toggle。**踩過，見 log 2026-05-30 CHANGE-003**。
+- Next.js 的 `src/` 內互相 import 不可帶 `.ts` extension（Vercel build 走 `allowImportingTsExtensions=false` 直接拒、deployment 失敗）；node:test 的 `tests/*.test.ts` 才需要 explicit `.ts`。**踩過，見 log 2026-05-30 CHANGE-015**。
 
 ---
 

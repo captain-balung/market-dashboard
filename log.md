@@ -226,6 +226,25 @@
 - **決策內容**：脈絡：單一 admin 場景無第二把 key 需求；新增環境變數會增加管理成本。選項：(A) 沿用 CRON_SECRET；(B) 新增 ADMIN_SESSION_SECRET。決定：A。後果：未來若 admin 與 cron secret 需分離（例如轉發給第三方 cron 服務），改成 B 需 logout 全 session（無向下兼容）。
 - **風險等級**：低
 
+## CHANGE-015
+
+- **時間戳**：2026-05-30T02:50:00+08:00
+- **類型**：修正
+- **範圍與摘要**：source 內部 import 統一不帶 `.ts` extension（之前我為了讓 node:test runner 認得而帶 `.ts`，但 Next.js 預設 tsconfig `allowImportingTsExtensions=false`，prod build 報「An import path can only end with a '.ts' extension when allowImportingTsExtensions is enabled」並 abort）。
+- **觸發來源**：自動偵測（Vercel build failed、線上 alias 卡在前一份）
+- **決策內容**：src/ 內 5 個檔（digest, retention, news/{cryptopanic,finnhub-news,marketaux}）的相對 import 移除 `.ts`。tests/ 維持帶 `.ts`（node:test 走 `--experimental-strip-types` 路徑需要 explicit extension）。
+- **風險等級**：中（這個若沒抓到、admin 相關所有改動都不上線）
+- **後果**：之後晉升 ai-rules.md 硬性教訓——「Next.js source 內互相 import 不可帶 .ts extension，僅 node:test files 才帶」。
+
+## CHANGE-016
+
+- **時間戳**：2026-05-30T02:50:00+08:00
+- **類型**：修正
+- **範圍與摘要**：Finnhub key 換新（40 字元、之前 20 字元的 free tier key 被 Finnhub 回 "Invalid API key"）。bash 路徑重 upload Vercel production env。
+- **觸發來源**：人類指示（cmd c → 修 Finnhub key）
+- **後果**：線上 /api/prices 美股 7 標的全部有實際值。**注意**：Finnhub free tier 的 `/stock/market-status` endpoint 對 isOpen 永遠回 false，所以 marketClosed flag 在線上一直是 true；但 `/quote` 回實際 c 與 pc，code 正確顯示 price 與「休市」label（前者真實後者保守）。
+- **風險等級**：低
+
 ## CHANGE-014
 
 - **時間戳**：2026-05-30T02:30:00+08:00
