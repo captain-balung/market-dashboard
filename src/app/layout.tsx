@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { cookies } from "next/headers";
+import { THEME_COOKIE, DEFAULT_THEME, isValidTheme } from "@/lib/theme";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -17,17 +19,20 @@ export const metadata: Metadata = {
   description: "個人用加密／貴金屬／美股每日新聞與盯盤看板",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const raw = cookieStore.get(THEME_COOKIE)?.value;
+  const theme = isValidTheme(raw) ? raw : DEFAULT_THEME;
   return (
     <html
       lang="zh-Hant"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${theme} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-zinc-950 text-zinc-100">{children}</body>
+      <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
 }

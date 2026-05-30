@@ -1,49 +1,25 @@
+import Link from "next/link";
+import { cookies } from "next/headers";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import { fetchCoingeckoPrices } from "@/lib/coingecko";
 import { fetchFinnhubStockPrices } from "@/lib/finnhub";
-import { calcChangePct, type ChangeValue } from "@/lib/changePct";
+import { calcChangePct } from "@/lib/changePct";
 import { getTaipei9amUtc } from "@/lib/snapshot";
 import { AutoRefresh } from "@/components/AutoRefresh";
+import { PriceWall, type PriceCard } from "@/components/PriceWall";
+import { DigestSection } from "@/components/DigestSection";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { THEME_COOKIE, DEFAULT_THEME, isValidTheme } from "@/lib/theme";
+import type { DigestItem } from "@/lib/digest";
+import type { NewsCategory } from "@/lib/news/types";
 
 export const dynamic = "force-dynamic";
 
-type Card = {
-  symbol: string;
-  category: string;
-  price: number | null;
-  change: ChangeValue;
-  marketClosed: boolean;
-};
-
-function formatPrice(price: number | null): string {
-  if (price == null) return "—";
-  const digits = price < 1 ? 4 : 2;
-  return `$${price.toLocaleString("en-US", { maximumFractionDigits: digits })}`;
-}
-
-function formatChange(c: ChangeValue): { text: string; tone: "up" | "down" | "flat" | "muted" } {
-  if (c.kind === "closed") return { text: "休市", tone: "muted" };
-  if (c.kind === "unavailable") return { text: "—", tone: "muted" };
-  const pct = c.value * 100;
-  const sign = pct > 0 ? "+" : "";
-  const tone = pct > 0 ? "up" : pct < 0 ? "down" : "flat";
-  return { text: `${sign}${pct.toFixed(2)}%`, tone };
-}
-
-const TONE_CLASS: Record<"up" | "down" | "flat" | "muted", string> = {
-  up: "text-emerald-400",
-  down: "text-rose-400",
-  flat: "text-zinc-400",
-  muted: "text-zinc-500",
-};
-
-const CATEGORY_LABEL: Record<string, string> = {
-  crypto: "加密",
-  metal: "貴金屬",
-  stock: "美股",
-};
-
 export default async function Home() {
+  const cookieStore = await cookies();
+  const themeRaw = cookieStore.get(THEME_COOKIE)?.value;
+  const theme = isValidTheme(themeRaw) ? themeRaw : DEFAULT_THEME;
+
   const supabase = getSupabaseServerClient();
   const { data: watchlist, error: dbError } = await supabase
     .from("watchlist")
@@ -55,7 +31,9 @@ export default async function Home() {
   const cryptoSymbols = (watchlist ?? [])
     .filter((w) => w.category === "crypto" || w.category === "metal")
     .map((w) => w.symbol);
-  const stockSymbols = (watchlist ?? []).filter((w) => w.category === "stock").map((w) => w.symbol);
+  const stockSymbols = (watchlist ?? [])
+    .filter((w) => w.category === "stock")
+    .map((w) => w.symbol);
 
   const warnings: string[] = [];
   const cryptoPrices = await fetchCoingeckoPrices(cryptoSymbols).catch((e: unknown) => {
@@ -85,7 +63,7 @@ export default async function Home() {
     snapMap.set(s.symbol, e);
   }
 
-  const cards: Card[] = (watchlist ?? []).map((w) => {
+  const cards: PriceCard[] = (watchlist ?? []).map((w) => {
     let price: number | null = null;
     let marketClosed = false;
     if (w.category === "crypto" || w.category === "metal") {
@@ -96,53 +74,56 @@ export default async function Home() {
       marketClosed = sp?.marketClosed ?? false;
     }
     const snap = snapMap.get(w.symbol) ?? {};
-    const change = calcChangePct(
-      snap.today,
-      snap.yesterday,
-      marketClosed && w.category === "stock",
-    );
+    const change = calcChangePct(snap.today, snap.yesterday, marketClosed && w.category === "stock");
     return { symbol: w.symbol, category: w.category, price, change, marketClosed };
   });
 
+  // digest
+  const { data: digestRow } = await supabase
+    .from("daily_digest")
+    .select("date, payload")
+    .order("date", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const digestDate: string | null = digestRow?.date ?? null;
+  const digestCategories: Partial<Record<NewsCategory, DigestItem[]>> =
+    (digestRow?.payload as Partial<Record<NewsCategory, DigestItem[]>>) ?? {};
+
   return (
-    <main className="mx-auto w-full max-w-6xl px-6 py-10">
+    <main className="mx-auto w-full max-w-7xl px-5 py-6">
       <AutoRefresh />
 
-      <header className="mb-6 flex items-end justify-between gap-4">
+      <header className="mb-5 flex items-baseline justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Market Dashboard</h1>
-          <p className="mt-1 text-xs text-zinc-500">
-            現價每 15 分更新 / 漲跌% 為 09:00 定格 — Phase 1 MVP，Phase 3 換完整版面
+          <h1 className="text-xl font-semibold tracking-tight">Market Dashboard</h1>
+          <p className="mt-0.5 text-[11px] text-[var(--color-muted)]">
+            現價每 15 分更新 · 漲跌% 為台北 09:00 定格 · 摘要每日 09:00 生成
           </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/weekly"
+            className="rounded border border-[var(--color-border)] px-2 py-1 text-xs text-[var(--color-muted)] hover:bg-[var(--color-surface)]"
+          >
+            本週重點
+          </Link>
+          <ThemeToggle initial={theme} />
         </div>
       </header>
 
       {dbError ? (
-        <div className="rounded border border-red-900 bg-red-950/50 p-4 text-sm text-red-200">
+        <div className="rounded border border-red-900 bg-red-950/30 p-4 text-sm text-red-200">
           Supabase 讀取失敗：{dbError.message}
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-          {cards.map((c) => {
-            const ch = formatChange(c.change);
-            return (
-              <div key={c.symbol} className="rounded-lg border border-zinc-800 bg-zinc-900/60 p-3">
-                <div className="flex items-baseline justify-between">
-                  <div className="text-sm font-medium">{c.symbol}</div>
-                  <div className="text-[10px] uppercase tracking-wider text-zinc-500">
-                    {CATEGORY_LABEL[c.category] ?? c.category}
-                  </div>
-                </div>
-                <div className="mt-2 font-mono text-lg tabular-nums">{formatPrice(c.price)}</div>
-                <div className={`mt-1 text-xs tabular-nums ${TONE_CLASS[ch.tone]}`}>{ch.text}</div>
-              </div>
-            );
-          })}
+        <div className="space-y-6">
+          <PriceWall cards={cards} />
+          <DigestSection digestDate={digestDate} categories={digestCategories} />
         </div>
       )}
 
       {warnings.length > 0 ? (
-        <ul className="mt-6 space-y-1 text-xs text-amber-400">
+        <ul className="mt-4 space-y-0.5 text-[11px] text-amber-500">
           {warnings.map((w, i) => (
             <li key={i}>• {w}</li>
           ))}

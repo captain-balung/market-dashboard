@@ -145,3 +145,65 @@
 - **範圍與摘要**：build script 短暫加過 `--webpack` flag、Vercel 加過 `NEXT_DISABLE_TURBOPACK=1` env var。CHANGE-001 降版後 `--webpack` flag 移除（Next.js 15 無此 flag）；env var 因 .env.local 不再列也未重 upload。
 - **觸發來源**：自動偵測（試錯路徑）
 - **風險等級**：低（Vercel 端 `NEXT_DISABLE_TURBOPACK=1` 殘留，無實際作用；下次 env 整理時可手動 rm）
+
+## DECISION-008
+
+- **時間戳**：2026-05-30T01:00:00+08:00
+- **類型**：決策
+- **範圍與摘要**：Phase 1.A.1 watchlist 種子數量定為 **15 筆**（非 spec 文 case 寫的「16」）。
+- **觸發來源**：自動偵測（spec.md 內部矛盾：F-01 表「16 筆種子」vs 範圍邊界「美股七雄、6 個幣、PAXG 金、KAG 銀」=7+6+1+1=15）
+- **決策內容**：採以範圍邊界明列為準（15），F-01 表的「16」標為粗算筆誤。roadmap 1.A.1 同步修正。
+- **風險等級**：低
+
+## CHANGE-006
+
+- **時間戳**：2026-05-30T01:30:00+08:00
+- **類型**：變更
+- **範圍與摘要**：Phase 1 完整 code complete。新增 `src/lib/{coingecko,finnhub,changePct,snapshot}.ts`、`src/app/api/{watchlist,prices,cron/snapshot}/route.ts`、`src/components/AutoRefresh.tsx`、`src/app/page.tsx` 改 15 卡片版。mock test 11 案全過。
+- **觸發來源**：使用者指示「進 Phase 1」
+- **風險等級**：低
+
+## CHANGE-007
+
+- **時間戳**：2026-05-30T01:30:00+08:00
+- **類型**：自主判斷
+- **範圍與摘要**：Phase 2 Claude SDK 選 **raw fetch 而非 @anthropic-ai/sdk**。
+- **觸發來源**：AI 自主判斷
+- **決策內容**：脈絡：spec/design 沒指定 SDK；用量極低（每天 5 次摘要 + 每週 1 次週報）；不需要 streaming/batching/auto-retry。選項：（A）raw fetch；（B）安裝 SDK。決定：A。後果：若之後需要 prompt caching、tool use、批次 batch API 再升 SDK。
+- **風險等級**：低
+
+## CHANGE-008
+
+- **時間戳**：2026-05-30T01:30:00+08:00
+- **類型**：變更
+- **範圍與摘要**：Phase 2 完整 code complete。新增 `src/lib/news/{types,cryptopanic,finnhub-news,marketaux}.ts`、`src/lib/{claude,digest,retention}.ts`、`src/app/api/{cron/daily,cron/weekly,digest}/route.ts`、`vercel.json` crons 設定。mock test 新增 9 案總計 20/20 過。
+- **觸發來源**：使用者指示「繼續 Phase 2 不要停」
+- **風險等級**：低
+- **caveat**：F-10/F-11 真實 Claude API call、F-21/F-22 真實 cron 觸發、F-23 真實過期資料清理三項驗證待人類授權後手動 trigger 或等首次 Vercel cron 排程（每日 01:00 UTC = 台北 09:00）。
+
+## CHANGE-009
+
+- **時間戳**：2026-05-30T02:00:00+08:00
+- **類型**：自主判斷
+- **範圍與摘要**：主題切換不引入 next-themes 等套件，自寫 cookie-based class toggle。
+- **觸發來源**：AI 自主判斷
+- **決策內容**：脈絡：spec 要求深淺切換 + cookie persist + 預設深；next-themes 是社群標準但需新依賴。選項：（A）自寫；（B）next-themes。決定：A。後果：~50 行（globals.css 配 @variant + theme.ts + ThemeToggle.tsx + layout.tsx 從 cookies() 注 className），無 hydration flash。
+- **風險等級**：低
+
+## CHANGE-010
+
+- **時間戳**：2026-05-30T02:00:00+08:00
+- **類型**：自主判斷
+- **範圍與摘要**：週報頁面暫不引入 markdown renderer，用 `<pre className="whitespace-pre-wrap">` 顯原文。
+- **觸發來源**：AI 自主判斷
+- **決策內容**：Phase 3.3 spec 驗收「點擊可見週報」minimum 過；Phase 4 視覺拍板後正式換 react-markdown 或自寫 minimal markdown→React node 轉換器。
+- **風險等級**：低
+
+## CHANGE-011
+
+- **時間戳**：2026-05-30T02:00:00+08:00
+- **類型**：變更
+- **範圍與摘要**：Phase 3 完整 code complete。新增 `src/components/{PriceWall,DigestSection,ThemeToggle}.tsx`、`src/lib/theme.ts`、`src/app/weekly/page.tsx`；改寫 `src/app/page.tsx` 用 PriceWall + DigestSection + ThemeToggle 並從 cookies() 讀主題；globals.css 改 @variant class-based dark mode。
+- **觸發來源**：使用者指示「繼續往下不要停」
+- **風險等級**：低
+- **caveat**：3.5 緊湊密度為 minimum 版，正式設計細調等 Phase 4 視覺風格拍板後處理。Phase 3.3 weekly markdown 顯原文，待 polish。

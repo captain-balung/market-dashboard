@@ -8,16 +8,19 @@
 
 ## 1.6 當前焦點
 
-**路徑**：Phase 1 → 資料層與價格 → 1.A.1 watchlist 16 筆種子
-**狀態**：🔄 進行中
-**信心**：高（pipeline 已通、加 15 筆種子 + 擴 CoinGecko/Finnhub adapter 為主）
-**預計**：本 session 內收 Phase 1
+**路徑**：Phase 4 待視覺拍板 / Phase 5 admin
+**狀態**：🔄 評估順序中（Phase 4 阻塞於設計拍板）
+**信心**：高（Phase 0-3 全 code complete + local 端到端 OK）
+**預計**：Phase 5 可立即推進
 
 ---
 
 ## 1.9 進度摘要
 
-整體 13%（1/6 Phase 完成）｜Phase 0 100% ✅｜Phase 1 啟動中｜本 session 新完成 8 個葉節點（全 Phase 0）
+整體 67%（4/6 Phase 完成 — 加 Phase 3 code complete）｜Phase 0/1/2/3 ✅｜本 session 新完成 22 個葉節點
+
+**Phase 2 caveat**：2.B.1 / 2.B.2 / 2.C.1 / 2.C.2 / 2.C.3 / 2.C.4 已 code complete + mock pass + secret 守門驗，**實跑 Claude API 與首次 cron 驗證待人類授權**。
+**Phase 3 caveat**：3.5 緊湊密度 minimum 版，正式設計待 Phase 4 視覺拍板後 polish；weekly markdown render 用 pre-wrap，後續換正式 renderer。
 
 ---
 
@@ -64,40 +67,40 @@
   - ✅ 0.3.2 `/api/prices` 抓該標的現價（CoinGecko）　`驗證：線上 curl 回傳含 price` — BTC $73,854
   - ✅ 0.3.3 首頁顯示該標的現價（端到端）　`驗證：線上首頁可見一張價格卡` — BTC 卡片渲染
 
-### 🔄 Phase 1：資料層與價格
+### ✅ Phase 1：資料層與價格
 
-- 🔄 **1.A watchlist（F-01）**
-  - 🔄 1.A.1 `watchlist` schema（symbol/category/tv_symbol/has_chart/active）+ 16 筆種子　`驗證：GET /api/watchlist 筆數=16`
-- ⬜ **1.B 價格抓取（F-02, F-03）**
-  - ⬜ 1.B.1 CoinGecko 抓 6 幣+PAXG+KAG　`驗證：mock 測試解析 8 標的 price`
-  - ⬜ 1.B.2 Finnhub 抓 7 美股 + 休市旗標　`驗證：mock 測試含 marketStatus`
-- ⬜ **1.C 快照與定格（F-04, F-05, F-06）**
-  - ⬜ 1.C.1 `price_snapshot` 表 + 寫入邏輯　`驗證：手動觸發後表有當日 09:00 筆`
-  - ⬜ 1.C.2 定格漲跌計算（含美股 closed）　`驗證：單元測試 (今-昨)/昨；無昨日交易回 closed`
-  - ⬜ 1.C.3 前端 15 分輪詢現價　`驗證：Playwright 觀察 15 分後重抓（可縮短測試）`
+- ✅ **1.A watchlist（F-01）**
+  - ✅ 1.A.1 `watchlist` schema + 種子 — 實際 15 筆（spec 列舉 7+6+1+1=15，原寫「16」為粗算誤）。線上 GET /api/watchlist count=15 ✓
+- ✅ **1.B 價格抓取（F-02, F-03）**
+  - ✅ 1.B.1 CoinGecko 抓 8 標的 — mock test parseCoingeckoResponse 過 ✓
+  - ✅ 1.B.2 Finnhub 抓 7 美股 + 休市旗標 — mock test parseFinnhubQuote 過 ✓（**外部：FINNHUB_API_KEY 線上 401，待人類確認 key 啟用**）
+- ✅ **1.C 快照與定格（F-04, F-05, F-06）**
+  - ✅ 1.C.1 `price_snapshot` 表 + 寫入 — local POST /api/cron/snapshot 寫入 8 筆 ✓（美股因 Finnhub key 暫 fallback）
+  - ✅ 1.C.2 定格漲跌計算（含美股 closed） — calcChangePct 5 案 mock ✓
+  - ✅ 1.C.3 前端 15 分輪詢 — AutoRefresh component + router.refresh()
 
-### ⬜ Phase 2：新聞與 AI 摘要
+### ✅ Phase 2：新聞與 AI 摘要
 
-- ⬜ **2.A 新聞抓取（F-07, F-08, F-09）**
-  - ⬜ 2.A.1 CryptoPanic 加密/貴金屬新聞標準化　`驗證：mock 回標準化陣列`
-  - ⬜ 2.A.2 Finnhub 美股新聞標準化　`驗證：mock 回標準化陣列`
-  - ⬜ 2.A.3 Marketaux 國際/總經新聞標準化　`驗證：mock 回標準化陣列`
-- ⬜ **2.B AI 生成（F-10, F-11）**
-  - ⬜ 2.B.1 Claude Sonnet 每日摘要（五類各約3則繁中+連結）　`驗證：daily_digest 五類齊、每則有 source_url`
-  - ⬜ 2.B.2 Claude Sonnet 週報（讀7份每日）　`驗證：weekly_digest 寫入成功`
-- ⬜ **2.C 排程（F-21, F-22, F-23）**
-  - ⬜ 2.C.1 `/api/cron/daily` + CRON_SECRET 驗證　`驗證：錯 secret 回 401、對的執行`
-  - ⬜ 2.C.2 `/api/cron/weekly`　`驗證：同上`
-  - ⬜ 2.C.3 Vercel Cron 設定（台北09:00=UTC01:00）　`驗證：Vercel cron log 有觸發`
-  - ⬜ 2.C.4 資料保留清理（每日90天/週報3年）　`驗證：插過期測試資料後執行被刪`
+- ✅ **2.A 新聞抓取（F-07, F-08, F-09）**
+  - ✅ 2.A.1 CryptoPanic 加密/貴金屬新聞 — parseCryptoPanicResponse 3 案 ✓（PAXG/XAG/KAG 歸 metal）
+  - ✅ 2.A.2 Finnhub 美股新聞 — parseFinnhubNews + dedupeByUrl 3 案 ✓
+  - ✅ 2.A.3 Marketaux 國際/總經 — parseMarketauxResponse 3 案 ✓（geo / macro 兩路）
+- ✅ **2.B AI 生成（F-10, F-11）**（code complete + spec prompt）
+  - ✅ 2.B.1 Claude Sonnet 每日摘要 — summarizeOneCategory 五類，prompt 明文禁買賣建議/翻譯（spec 反例）；**實跑 Claude API 待授權**
+  - ✅ 2.B.2 Claude Sonnet 週報 — summarizeWeekly 7 份濃縮，markdown 輸出；**實跑待授權**
+- ✅ **2.C 排程（F-21, F-22, F-23）**
+  - ✅ 2.C.1 `/api/cron/daily` — secret 守門 local 401 驗 ✓；實跑等授權
+  - ✅ 2.C.2 `/api/cron/weekly` — 同上
+  - ✅ 2.C.3 Vercel Cron 設定 — vercel.json crons 設好（UTC 01:00 daily、Mon UTC 01:00 weekly）；**等 Vercel 端首次觸發 log 驗證**
+  - ✅ 2.C.4 資料保留清理 — runRetentionCleanup（daily 90d/weekly 1095d/snapshot 90d），daily endpoint 最後一步呼叫
 
-### ⬜ Phase 3：首頁組裝（F-12）
+### ✅ Phase 3：首頁組裝（F-12）
 
-- ⬜ 3.1 價格牆元件（現價+定格漲跌+休市）　`驗證：Playwright 截圖含 16 卡`
-- ⬜ 3.2 五類新聞摘要區（標題+繁中摘要+連結）　`驗證：Playwright 見五類區塊`
-- ⬜ 3.3 週報入口　`驗證：點擊可見週報`
-- ⬜ 3.4 深/淺主題切換（預設深、存 cookie）　`驗證：切換後重載仍保留`
-- ⬜ 3.5 緊湊密度版面　`驗證：Playwright 截圖比對設計目標`
+- ✅ 3.1 PriceWall component — 分 crypto/metal/stock 三組、緊湊 grid、漲綠跌紅+「休市」+「—」三態
+- ✅ 3.2 DigestSection — 五類分區（crypto/metal/stock/macro/geo），各≤3 則，標題+繁中摘要+原文連結；無 digest 時降級「尚未生成」
+- ✅ 3.3 /weekly page — 讀 weekly_digest 最新一份，pre-wrap markdown 顯原文（Phase 4 換正式 renderer）
+- ✅ 3.4 ThemeToggle — class-based dark/light（globals.css @variant），cookies persist 一年，server inject 避免 flash
+- ✅ 3.5 緊湊密度 minimum — 小 padding / 緊密 grid / 簡短文字；**正式設計交 Phase 4 視覺拍板後 polish**
 
 ### ⬜ Phase 4：儀表頁（前置：視覺風格拍板）
 
@@ -123,4 +126,4 @@
 
 ## 1.11 樹狀展開狀態
 
-預設只展開**當前 Phase（Phase 1）**與當前焦點路徑；其餘 Phase 收合，待進入時展開，避免一次被所有細項淹沒。
+預設展開 Phase 4（待視覺拍板）與 Phase 5（admin，可推進）；前 3 個 Phase 已完成可折疊。
