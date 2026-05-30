@@ -2,6 +2,20 @@
 
 > 個人用的加密貨幣／貴金屬／美股每日新聞與盯盤儀表網站。
 
+## 線上版本
+
+🌐 **正式站**：<https://market-dashboard-five-liard.vercel.app>
+
+| 入口 | 路徑 |
+|---|---|
+| 首頁（價格牆 + 五類 AI 新聞摘要） | [`/`](https://market-dashboard-five-liard.vercel.app/) |
+| 盯盤儀表（TradingView K 線 + 情緒/總經） | [`/dashboard/BTC`](https://market-dashboard-five-liard.vercel.app/dashboard/BTC) |
+| 切換標的 | `/dashboard/{symbol}` — 例：`/dashboard/ETH`、`/dashboard/AAPL`、`/dashboard/NVDA` |
+| 本週重點（週報） | [`/weekly`](https://market-dashboard-five-liard.vercel.app/weekly) |
+| admin 登入 | [`/admin`](https://market-dashboard-five-liard.vercel.app/admin) |
+
+> 全站訪客唯讀，admin 路徑需登入。
+
 ## 一句話描述
 
 每天早上自動彙整三大市場新聞、附 AI 繁中解讀，並提供 TradingView 盯盤儀表的個人看板。
